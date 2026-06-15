@@ -138,6 +138,7 @@ const state = {
   allPosts: [],          // 読み込み済みの投稿（無限スクロールで増える）
   nextId: 1,
   currentCategory: 'all',
+  tagBarCategory: 'all',
   activeTags: new Set(),
   showPinnedOnly: false,
   searchKeyword: '',
@@ -319,7 +320,7 @@ function getFilteredPosts() {
    描画：タグ一覧
    ========================================================= */
 function renderTagList() {
-  const tags = CATEGORY_TAGS[state.currentCategory] || [];
+  const tags = CATEGORY_TAGS[state.tagBarCategory] || [];
   els.tagList.innerHTML = '';
 
   tags.forEach((tag) => {
@@ -337,7 +338,7 @@ function renderTagList() {
 /* 選んだカテゴリ名をクリックしたときに、そのカテゴリの全タグを
    スクロール無しのグリッドで表示するパネル */
 function renderTagPanel() {
-  const tags = CATEGORY_TAGS[state.currentCategory] || [];
+  const tags = CATEGORY_TAGS[state.tagBarCategory] || [];
   els.tagPanel.innerHTML = '';
 
   tags.forEach((tag) => {
@@ -519,7 +520,7 @@ function setupPulldown() {
   els.pulldownItems.forEach((item) => {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
-      selectCategory(item.dataset.category);
+      selectTagBarCategory(item.dataset.category);
       closePulldown();
     });
   });
@@ -553,10 +554,28 @@ function toggleTagPanel() {
   }
 }
 
+function selectTagBarCategory(categoryId) {
+  state.tagBarCategory = categoryId;
+
+  const categoryInfo = CATEGORIES.find((c) => c.id === categoryId);
+  els.categoryCurrent.textContent = categoryInfo ? categoryInfo.label : 'すべて';
+
+  els.pulldownItems.forEach((item) => {
+    item.classList.toggle('active', item.dataset.category === categoryId);
+  });
+
+  renderTagList();
+  if (els.tagPanel.classList.contains('open')) {
+    renderTagPanel();
+  }
+}
+
 function selectCategory(categoryId) {
   state.currentCategory = categoryId;
+  state.tagBarCategory = categoryId;
   state.showPinnedOnly = false;
   state.activeTags = new Set();
+  updateClearTagsBtn();
   state.searchKeyword = '';
   els.searchInput.value = '';
 
