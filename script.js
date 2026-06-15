@@ -599,6 +599,39 @@ function setupTagListEvents() {
 
   els.tagList.addEventListener('click', handleTagClick);
   els.tagPanel.addEventListener('click', handleTagClick);
+
+  // マウスホイールで横スクロール
+  els.tagList.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      els.tagList.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+
+  // ドラッグで横スクロール
+  let isDragging = false;
+  let startX = 0;
+  let scrollStart = 0;
+
+  els.tagList.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    scrollStart = els.tagList.scrollLeft;
+    els.tagList.style.cursor = 'grabbing';
+    els.tagList.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    els.tagList.scrollLeft = scrollStart - (e.clientX - startX);
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    els.tagList.style.cursor = '';
+    els.tagList.style.userSelect = '';
+  });
 }
 
 /* =========================================================
