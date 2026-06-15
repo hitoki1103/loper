@@ -610,11 +610,13 @@ function setupTagListEvents() {
 
   // ドラッグで横スクロール
   let isDragging = false;
+  let hasDragged = false;
   let startX = 0;
   let scrollStart = 0;
 
   els.tagList.addEventListener('mousedown', (e) => {
     isDragging = true;
+    hasDragged = false;
     startX = e.clientX;
     scrollStart = els.tagList.scrollLeft;
     els.tagList.style.cursor = 'grabbing';
@@ -623,7 +625,9 @@ function setupTagListEvents() {
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    els.tagList.scrollLeft = scrollStart - (e.clientX - startX);
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 4) hasDragged = true;
+    els.tagList.scrollLeft = scrollStart - dx;
   });
 
   window.addEventListener('mouseup', () => {
@@ -632,6 +636,14 @@ function setupTagListEvents() {
     els.tagList.style.cursor = '';
     els.tagList.style.userSelect = '';
   });
+
+  // ドラッグ後の誤クリックをキャプチャフェーズでキャンセル
+  els.tagList.addEventListener('click', (e) => {
+    if (hasDragged) {
+      e.stopImmediatePropagation();
+      hasDragged = false;
+    }
+  }, true);
 }
 
 /* =========================================================
