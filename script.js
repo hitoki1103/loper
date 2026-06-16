@@ -154,6 +154,10 @@ const state = {
 
 let postSelectedTags = new Set();
 
+const CROP_SIZE = 280;    // トリムコンテナのサイズ（px）
+const CROP_RADIUS = 120;  // トリム円の半径（px）
+const cropState = { scale: 1, minScale: 1, maxScale: 4, tx: 0, ty: 0, dragging: false, lastX: 0, lastY: 0 };
+
 const MAX_POSTS = 60;       // これ以上はロードしない
 const PAGE_SIZE = 4;        // 1回のスクロールで読み込む件数
 const ADS_EVERY = 20;       // 何件ごとに広告を挟むか
@@ -227,6 +231,13 @@ function cacheElements() {
   els.profileBio = document.getElementById('profileBio');
   els.profileLinksContainer = document.getElementById('profileLinks');
   els.profileAddLinkBtn = document.getElementById('profileAddLinkBtn');
+
+  els.avatarCropOverlay = document.getElementById('avatarCropOverlay');
+  els.avatarCropContainer = document.getElementById('avatarCropContainer');
+  els.avatarCropImage = document.getElementById('avatarCropImage');
+  els.avatarCropZoom = document.getElementById('avatarCropZoom');
+  els.avatarCropCancel = document.getElementById('avatarCropCancel');
+  els.avatarCropConfirm = document.getElementById('avatarCropConfirm');
 }
 
 /* ---------------- 初期化 ---------------- */
@@ -246,6 +257,7 @@ function init() {
   setupPostButton();
   setupSearch();
   setupProfileIcon();
+  setupAvatarCrop();
   setupProfilePanel();
   setupDetailModal();
   setupPostModal();
@@ -1037,21 +1049,9 @@ function setupProfilePanel() {
     showToast('設定画面へ移行します（このデモでは未実装です）');
   });
 
-  // アイコンクリックでファイルから画像を取得
+  // アイコンクリックでファイル選択 → トリムモーダルへ
   els.profileAvatar.addEventListener('click', () => {
     els.profileAvatarInput.click();
-  });
-  els.profileAvatarInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      state.profile.avatarUrl = ev.target.result;
-      applyProfileAvatar();
-      renderPosts(); // 投稿カードのアイコンにも反映
-    };
-    reader.readAsDataURL(file);
   });
 
   // 名前（文字数制限はmaxlengthで設定済み）
@@ -1109,6 +1109,153 @@ function renderProfileLinks() {
   });
 
   els.profileAddLinkBtn.disabled = state.profile.links.length >= MAX_LINKS;
+}
+
+/* =========================================================
+   アイコントリム
+   ========================================================= */
+function setupAvatarCrop() {
+  els.profileAvatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    els.profileAvatarInput.value = '';
+    const reader = new FileReader();
+    reader.onload = (ev) => openAvatarCrop(ev.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  els.avatarCropCancel.addEventListener('click', closeAvatarCrop);
+  els.avatarCropOverlay.addEventListener('click', (e) => {
+    if (e.target === els.avatarCropOverlay) closeAvatarCrop();
+  });
+  els.avatarCropConfirm.addEventListener('click', confirmAvatarCrop);
+  els.avatarCropZoom.addEventListener('input', onCropZoomChange);
+
+  const c = els.avatarCropContainer;
+  c.addEventListener('mousedown', onCropDragStart);
+  window.addEventListener('mousemove', onCropDragMove);
+  window.addEventListener('mouseup', onCropDragEnd);
+  c.addEventListener('touchstart', onCropTouchStart, { passive: false });
+  window.addEventListener('touchmove', onCropTouchMove, { passive: false });
+  window.addEventListener('touchend', onCropDragEnd);
+}
+
+function openAvatarCrop(src) {
+  const img = els.avatarCropImage;
+  img.onload = () => {
+    const diameter = CROP_RADIUS * 2;
+    cropState.minScale = Math.max(diameter / img.naturalWidth, diameter / img.naturalHeight);
+    cropState.maxScale = cropState.minScale * 4;
+    cropState.scale = cropState.minScale;
+    cropState.tx = (CROP_SIZE - img.naturalWidth * cropState.scale) / 2;
+    cropState.ty = (CROP_SIZE - img.naturalHeight * cropState.scale) / 2;
+    constrainCropTranslation();
+    applyCropTransform();
+    els.avatarCropZoom.value = 0;
+    els.avatarCropOverlay.classList.add('show');
+  };
+  img.src = src;
+}
+
+function closeAvatarCrop() {
+  els.avatarCropOverlay.classList.remove('show');
+}
+
+function applyCropTransform() {
+  els.avatarCropImage.style.transform =
+    `translate(${cropState.tx}px, ${cropState.ty}px) scale(${cropState.scale})`;
+}
+
+function constrainCropTranslation() {
+  const w = els.avatarCropImage.naturalWidth * cropState.scale;
+  const h = els.avatarCropImage.naturalHeight * cropState.scale;
+  const cx = CROP_SIZE / 2;
+  const cy = CROP_SIZE / 2;
+  const r = CROP_RADIUS;
+  cropState.tx = Math.max(cx + r - w, Math.min(cx - r, cropState.tx));
+  cropState.ty = Math.max(cy + r - h, Math.min(cy - r, cropState.ty));
+}
+
+function onCropZoomChange() {
+  const ratio = els.avatarCropZoom.value / 100;
+  const newScale = cropState.minScale + ratio * (cropState.maxScale - cropState.minScale);
+  const cx = CROP_SIZE / 2;
+  const cy = CROP_SIZE / 2;
+  const sr = newScale / cropState.scale;
+  cropState.tx = cx + (cropState.tx - cx) * sr;
+  cropState.ty = cy + (cropState.ty - cy) * sr;
+  cropState.scale = newScale;
+  constrainCropTranslation();
+  applyCropTransform();
+}
+
+function onCropDragStart(e) {
+  cropState.dragging = true;
+  cropState.lastX = e.clientX;
+  cropState.lastY = e.clientY;
+  els.avatarCropContainer.style.cursor = 'grabbing';
+}
+
+function onCropDragMove(e) {
+  if (!cropState.dragging) return;
+  cropState.tx += e.clientX - cropState.lastX;
+  cropState.ty += e.clientY - cropState.lastY;
+  cropState.lastX = e.clientX;
+  cropState.lastY = e.clientY;
+  constrainCropTranslation();
+  applyCropTransform();
+}
+
+function onCropDragEnd() {
+  if (!cropState.dragging) return;
+  cropState.dragging = false;
+  els.avatarCropContainer.style.cursor = 'grab';
+}
+
+function onCropTouchStart(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  cropState.dragging = true;
+  cropState.lastX = t.clientX;
+  cropState.lastY = t.clientY;
+}
+
+function onCropTouchMove(e) {
+  if (!cropState.dragging) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  cropState.tx += t.clientX - cropState.lastX;
+  cropState.ty += t.clientY - cropState.lastY;
+  cropState.lastX = t.clientX;
+  cropState.lastY = t.clientY;
+  constrainCropTranslation();
+  applyCropTransform();
+}
+
+function confirmAvatarCrop() {
+  const img = els.avatarCropImage;
+  const OUT = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = OUT;
+  canvas.height = OUT;
+  const ctx = canvas.getContext('2d');
+
+  ctx.beginPath();
+  ctx.arc(OUT / 2, OUT / 2, OUT / 2, 0, Math.PI * 2);
+  ctx.clip();
+
+  const cx = CROP_SIZE / 2;
+  const cy = CROP_SIZE / 2;
+  const r = CROP_RADIUS;
+  const srcX = (cx - r - cropState.tx) / cropState.scale;
+  const srcY = (cy - r - cropState.ty) / cropState.scale;
+  const srcSize = (r * 2) / cropState.scale;
+  ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, OUT, OUT);
+
+  state.profile.avatarUrl = canvas.toDataURL('image/jpeg', 0.92);
+  applyProfileAvatar();
+  renderPosts();
+  closeAvatarCrop();
 }
 
 /* =========================================================

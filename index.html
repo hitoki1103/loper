@@ -213,6 +213,26 @@
   </div>
 </div>
 
+<!-- アイコントリムモーダル -->
+<div class="avatar-crop-overlay" id="avatarCropOverlay">
+  <div class="avatar-crop-modal">
+    <h3 class="avatar-crop-title">アイコンの範囲を選択</h3>
+    <div class="avatar-crop-container" id="avatarCropContainer">
+      <img class="avatar-crop-image" id="avatarCropImage" alt="" draggable="false">
+      <div class="avatar-crop-circle"></div>
+    </div>
+    <div class="avatar-crop-zoom-wrap">
+      <span class="avatar-crop-zoom-label">縮小</span>
+      <input type="range" class="avatar-crop-zoom" id="avatarCropZoom" min="0" max="100" value="0">
+      <span class="avatar-crop-zoom-label">拡大</span>
+    </div>
+    <div class="avatar-crop-actions">
+      <button type="button" class="avatar-crop-btn cancel" id="avatarCropCancel">キャンセル</button>
+      <button type="button" class="avatar-crop-btn confirm" id="avatarCropConfirm">決定</button>
+    </div>
+  </div>
+</div>
+
 <!-- ライトボックス -->
 <div class="lightbox-overlay" id="lightboxOverlay">
   <img id="lightboxImage" alt="">
