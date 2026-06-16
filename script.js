@@ -22,7 +22,7 @@ const CATEGORY_BORDER_CLASS = {
 
 /* カテゴリごとのタグ一覧（タグバー・タグ一覧パネル表示用） */
 const CATEGORY_TAGS = {
-  game:  ['Unity', 'UE5', 'Godot', '2D', '3D', 'PixelArt', 'VR', 'AR', 'RPG', 'アクション', 'ホラー', 'パズル', 'シミュレーション', 'FPS', 'ADV', '初心者歓迎', '経験者募集', 'プログラマー募集', 'デザイナー募集', '作曲者募集'],
+  game:  ['Unity', 'UE5', 'Godot', '2D', '3D', 'PixelArt', 'VR', 'AR', 'RPG', 'アクション', 'ホラー', 'パズル', 'シミュレーション', 'FPS', 'ADV', 'オープンワールド', '初心者歓迎', '経験者募集', 'プログラマー募集', 'デザイナー募集', '作曲者募集'],
   app:   ['Android', 'iOS', 'Windows', 'Mac', 'Flutter', 'ReactNative', 'Swift', 'Kotlin', 'WebApp', 'ツールアプリ', '個人開発', '生活系', 'SNS', 'ゲームアプリ', '教育', '健康'],
   site:  ['HTML', 'CSS', 'JavaScript', 'React', 'Nextjs', 'PHP', 'Laravel', 'WordPress', 'ポートフォリオ', 'LP', '企業サイト', 'ECサイト', 'ブログ', 'デザイナー募集', 'コーダー募集', 'フロントエンド', 'バックエンド'],
   video: ['MV', 'PV', 'アニメーション', 'VFX', '3DCG', 'AfterEffects', 'PremierePro', 'Blender', 'Maya', 'Cinema4D', '編集者募集', 'イラスト募集', '声優募集'],
