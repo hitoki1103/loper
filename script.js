@@ -198,6 +198,8 @@ function cacheElements() {
   els.detailTitle = document.getElementById('detailTitle');
   els.detailImageBox = document.getElementById('detailImageBox');
   els.detailImage = document.getElementById('detailImage');
+  els.lightboxOverlay = document.getElementById('lightboxOverlay');
+  els.lightboxImage = document.getElementById('lightboxImage');
   els.detailDesc = document.getElementById('detailDesc');
   els.detailTags = document.getElementById('detailTags');
   els.detailDate = document.getElementById('detailDate');
@@ -824,6 +826,15 @@ function setupDetailModal() {
   els.detailModalOverlay.addEventListener('click', (e) => {
     if (e.target === els.detailModalOverlay) closeDetailModal();
   });
+
+  els.lightboxOverlay.addEventListener('click', () => {
+    els.lightboxOverlay.classList.remove('show');
+  });
+}
+
+function openLightbox(src) {
+  els.lightboxImage.src = src;
+  els.lightboxOverlay.classList.add('show');
 }
 
 function openDetailModal(post) {
@@ -840,12 +851,14 @@ function openDetailModal(post) {
 
   els.detailTitle.textContent = post.title;
 
-  // 画像（別枠で表示）
+  // 画像（サムネイル表示。クリックでライトボックス）
   if (post.image) {
     els.detailImage.src = post.image;
+    els.detailImage.onclick = () => openLightbox(post.image);
     els.detailImageBox.classList.add('has-image');
   } else {
     els.detailImage.src = '';
+    els.detailImage.onclick = null;
     els.detailImageBox.classList.remove('has-image');
   }
 
