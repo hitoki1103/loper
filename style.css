@@ -211,11 +211,33 @@ button {
 .selected-tags-pulldown-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 6px 10px 6px 16px;
   font-size: 13px;
   color: var(--text-dark);
   white-space: nowrap;
+}
+
+.selected-tags-pulldown-remove {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.selected-tags-pulldown-remove:hover {
+  background: rgba(0, 0, 0, 0.18);
 }
 
 .selected-tags-pulldown-empty {

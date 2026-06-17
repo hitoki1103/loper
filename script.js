@@ -706,7 +706,26 @@ function renderSelectedTagsPulldown() {
   state.activeTags.forEach((tag) => {
     const item = document.createElement('div');
     item.className = 'selected-tags-pulldown-item';
-    item.textContent = '#' + tag;
+
+    const label = document.createElement('span');
+    label.textContent = '#' + tag;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'selected-tags-pulldown-remove';
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.activeTags.delete(tag);
+      updateClearTagsBtn();
+      renderTagList();
+      if (els.tagPanel.classList.contains('open')) renderTagPanel();
+      renderPosts();
+      renderSelectedTagsPulldown();
+    });
+
+    item.appendChild(label);
+    item.appendChild(removeBtn);
     els.selectedTagsPulldown.appendChild(item);
   });
 }
