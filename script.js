@@ -153,6 +153,8 @@ const state = {
 };
 
 let postSelectedTags = new Set();
+let postSelectedFiles = [];
+let previewUrls = [];
 
 const CROP_SIZE = 280;    // トリムコンテナのサイズ（px）
 const CROP_RADIUS = 120;  // トリム円の半径（px）
@@ -210,14 +212,23 @@ function cacheElements() {
   els.detailPinBtn = document.getElementById('detailPinBtn');
 
   els.postModalOverlay = document.getElementById('postModalOverlay');
+  els.postModal = document.getElementById('postModal');
   els.postModalClose = document.getElementById('postModalClose');
   els.postForm = document.getElementById('postForm');
   els.postTitleInput = document.getElementById('postTitleInput');
   els.postCategoryInput = document.getElementById('postCategoryInput');
+  els.postDescInput = document.getElementById('postDescInput');
+  els.titleCharCounter = document.getElementById('titleCharCounter');
+  els.descCharCounter = document.getElementById('descCharCounter');
   els.postImageInput = document.getElementById('postImageInput');
+  els.fileInputDisplay = document.getElementById('fileInputDisplay');
+  els.imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  els.postTagDropdown = document.getElementById('postTagDropdown');
+  els.postTagDropdownDisplay = document.getElementById('postTagDropdownDisplay');
+  els.postTagDropdownPanel = document.getElementById('postTagDropdownPanel');
+  els.postTagDisplayText = document.getElementById('postTagDisplayText');
   els.postTagSelector = document.getElementById('postTagSelector');
   els.postTagsInput = document.getElementById('postTagsInput');
-  els.postDescInput = document.getElementById('postDescInput');
 
   els.toast = document.getElementById('toast');
 
@@ -945,6 +956,16 @@ function setupPostButton() {
   els.postButton.addEventListener('click', () => {
     els.postForm.reset();
     postSelectedTags = new Set();
+    postSelectedFiles = [];
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
+    previewUrls = [];
+    els.imagePreviewContainer.innerHTML = '';
+    els.titleCharCounter.textContent = '0 / 30';
+    els.titleCharCounter.className = 'char-counter';
+    els.descCharCounter.textContent = '0 / 500';
+    els.descCharCounter.className = 'char-counter';
+    updateFileInputDisplay();
+    updatePostModalBorder();
     renderPostTagSelector();
     els.postModalOverlay.classList.add('show');
   });
@@ -972,9 +993,11 @@ function renderPostTagSelector() {
         postSelectedTags.add(tag);
       }
       pill.classList.toggle('selected', postSelectedTags.has(tag));
+      updatePostTagDisplayText();
     });
     els.postTagSelector.appendChild(pill);
   });
+  updatePostTagDisplayText();
 }
 
 function setupPostModal() {
@@ -983,6 +1006,49 @@ function setupPostModal() {
     if (e.target === els.postModalOverlay) closePostModal();
   });
 
+  // カテゴリ変更 → モーダル枠色切替
+  els.postCategoryInput.addEventListener('change', updatePostModalBorder);
+
+  // タイトル文字数カウンター
+  els.postTitleInput.addEventListener('input', () => {
+    const len = els.postTitleInput.value.length;
+    els.titleCharCounter.textContent = len + ' / 30';
+    els.titleCharCounter.className = 'char-counter' + (len >= 30 ? ' at-limit' : len >= 25 ? ' near-limit' : '');
+  });
+
+  // 詳細文字数カウンター
+  els.postDescInput.addEventListener('input', () => {
+    const len = els.postDescInput.value.length;
+    els.descCharCounter.textContent = len + ' / 500';
+    els.descCharCounter.className = 'char-counter' + (len >= 500 ? ' at-limit' : len >= 450 ? ' near-limit' : '');
+  });
+
+  // 画像選択
+  els.postImageInput.addEventListener('change', (e) => {
+    const newFiles = [...e.target.files];
+    const remaining = 4 - postSelectedFiles.length;
+    if (remaining > 0) {
+      postSelectedFiles = [...postSelectedFiles, ...newFiles.slice(0, remaining)];
+    }
+    els.postImageInput.value = '';
+    updateImagePreviews();
+    updateFileInputDisplay();
+  });
+
+  // タグドロップダウン開閉
+  els.postTagDropdownDisplay.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = els.postTagDropdownPanel.classList.contains('open');
+    els.postTagDropdownPanel.classList.toggle('open', !isOpen);
+    els.postTagDropdown.classList.toggle('open', !isOpen);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!els.postTagDropdown.contains(e.target)) {
+      els.postTagDropdownPanel.classList.remove('open');
+      els.postTagDropdown.classList.remove('open');
+    }
+  });
 
   els.postForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1015,14 +1081,13 @@ function setupPostModal() {
 
       state.allPosts.unshift(newPost);
 
-      // 「すべて」表示にリセットして、作成した投稿を確認できるようにする
       selectCategory('all');
 
       closePostModal();
       showToast('投稿を作成しました');
     };
 
-    const imageFiles = [...els.postImageInput.files].slice(0, 4);
+    const imageFiles = postSelectedFiles.slice(0, 4);
     if (imageFiles.length > 0) {
       Promise.all(imageFiles.map((file) => new Promise((resolve) => {
         const reader = new FileReader();
@@ -1037,6 +1102,69 @@ function setupPostModal() {
 
 function closePostModal() {
   els.postModalOverlay.classList.remove('show');
+  els.postTagDropdownPanel.classList.remove('open');
+  els.postTagDropdown.classList.remove('open');
+}
+
+function updatePostModalBorder() {
+  const cat = els.postCategoryInput.value;
+  els.postModal.className = 'modal post-modal ' + (CATEGORY_BORDER_CLASS[cat] || 'cat-game');
+}
+
+function updatePostTagDisplayText() {
+  if (postSelectedTags.size === 0) {
+    els.postTagDisplayText.textContent = '選択してください';
+    els.postTagDisplayText.classList.add('placeholder');
+  } else {
+    els.postTagDisplayText.textContent = [...postSelectedTags].join('、');
+    els.postTagDisplayText.classList.remove('placeholder');
+  }
+}
+
+function updateFileInputDisplay() {
+  const count = postSelectedFiles.length;
+  if (count === 0) {
+    els.fileInputDisplay.textContent = 'ファイルが選択されていません';
+    els.fileInputDisplay.setAttribute('for', 'postImageInput');
+  } else if (count >= 4) {
+    els.fileInputDisplay.textContent = '4枚選択中（上限）';
+    els.fileInputDisplay.removeAttribute('for');
+  } else {
+    els.fileInputDisplay.textContent = count + '枚選択中（クリックで追加）';
+    els.fileInputDisplay.setAttribute('for', 'postImageInput');
+  }
+}
+
+function updateImagePreviews() {
+  previewUrls.forEach(url => URL.revokeObjectURL(url));
+  previewUrls = [];
+  els.imagePreviewContainer.innerHTML = '';
+
+  postSelectedFiles.forEach((file, i) => {
+    const url = URL.createObjectURL(file);
+    previewUrls.push(url);
+
+    const item = document.createElement('div');
+    item.className = 'image-preview-item';
+
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'image-preview-remove';
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', () => {
+      postSelectedFiles.splice(i, 1);
+      updateImagePreviews();
+      updateFileInputDisplay();
+    });
+
+    item.appendChild(img);
+    item.appendChild(removeBtn);
+    els.imagePreviewContainer.appendChild(item);
+  });
 }
 
 /* =========================================================

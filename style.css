@@ -770,6 +770,18 @@ button {
 .modal.cat-site  { border-top-color: var(--card-border-site); }
 .modal.cat-video { border-top-color: var(--card-border-video); }
 
+/* 投稿作成モーダル専用（全辺ボーダー・大きめ） */
+#postModal {
+  border: 3px solid var(--card-border-game);
+  max-width: 680px;
+  max-height: 90vh;
+}
+
+#postModal.cat-game { border-color: var(--card-border-game); }
+#postModal.cat-app  { border-color: var(--card-border-app); }
+#postModal.cat-site { border-color: var(--card-border-site); }
+#postModal.cat-video { border-color: #D0D0D0; }
+
 .modal-close {
   position: absolute;
   top: 16px;
@@ -929,7 +941,7 @@ button {
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 120px;
 }
 
 .form-submit {
@@ -1323,4 +1335,138 @@ button {
 .profile-add-link-btn:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+/* ================= 文字数カウンター ================= */
+.char-counter {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #9BBBBF;
+  margin-top: 3px;
+}
+
+.char-counter.near-limit { color: #C07000; }
+.char-counter.at-limit   { color: #D03030; }
+
+/* ================= ファイル入力（スタイル付きラベル） ================= */
+.file-input-label {
+  display: block;
+  width: 100%;
+  border: 1px solid #CFDEDD;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #AABFC2;
+  cursor: pointer;
+  background: #fff;
+  user-select: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.file-input-label:hover { border-color: var(--card-border); }
+
+/* ================= 画像プレビュー ================= */
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.image-preview-item {
+  position: relative;
+  width: calc(25% - 6px);
+  flex-shrink: 0;
+}
+
+.image-preview-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.image-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.image-preview-remove:hover { background: rgba(0, 0, 0, 0.75); }
+
+/* ================= タグ選択ドロップダウン ================= */
+.post-tag-dropdown {
+  width: 100%;
+}
+
+.post-tag-dropdown-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid #CFDEDD;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  user-select: none;
+  transition: border-color 0.15s, border-radius 0.15s;
+}
+
+.post-tag-dropdown-display:hover { border-color: var(--card-border); }
+
+.post-tag-dropdown.open .post-tag-dropdown-display {
+  border-color: var(--card-border);
+  border-radius: 8px 8px 0 0;
+}
+
+.post-tag-display-text {
+  font-size: 14px;
+  color: var(--text-dark);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+.post-tag-display-text.placeholder { color: #AABFC2; }
+
+.post-tag-dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+
+.post-tag-dropdown-panel {
+  display: none;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.post-tag-dropdown-panel.open { display: block; }
+
+.post-tag-dropdown-panel .post-tag-selector {
+  border: none;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
 }
