@@ -1317,12 +1317,6 @@ function setupProfilePanel() {
     showIconDeleteConfirm();
   });
 
-  // 名前（文字数制限はmaxlengthで設定済み）
-  els.profileNameInput.addEventListener('input', () => {
-    state.profile.name = els.profileNameInput.value;
-    renderPosts();
-    debouncedSaveProfile();
-  });
 
   // 自己紹介
   els.profileBio.addEventListener('input', () => {
@@ -1556,7 +1550,7 @@ function setupSettings() {
     const newName = els.settingsNameInput.value.trim();
     if (!newName) return;
     state.profile.name = newName;
-    els.profileNameInput.value = newName;
+    els.profileNameInput.textContent = newName;
     renderPosts();
     debouncedSaveProfile();
     showToast('名前を変更しました');
@@ -1766,7 +1760,7 @@ async function onFirebaseLogin(user) {
     state.profile.avatarUrl = user.photoURL || '';
   }
 
-  els.profileNameInput.value = state.profile.name;
+  els.profileNameInput.textContent = state.profile.name;
   els.profileBio.value = state.profile.bio;
   applyProfileAvatar();
   renderProfileLinks();
@@ -1784,7 +1778,7 @@ function onFirebaseLogout() {
   state.profile.bio = '';
   state.profile.links = [''];
 
-  els.profileNameInput.value = state.profile.name;
+  els.profileNameInput.textContent = state.profile.name;
   els.profileBio.value = state.profile.bio;
   applyProfileAvatar();
   renderProfileLinks();
