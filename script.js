@@ -800,6 +800,10 @@ function setupPinSection() {
 }
 
 function togglePin(post, btnEl) {
+  if (!state.currentUser) {
+    showLoginPrompt();
+    return;
+  }
   post.pinned = !post.pinned;
 
   if (state.showPinnedOnly && !post.pinned) {
