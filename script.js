@@ -1546,6 +1546,14 @@ function setupSettings() {
     if (e.target === els.settingsOverlay) closeSettings();
   });
 
+  const expiredHeader = document.getElementById('expiredPulldownHeader');
+  const expiredArrow = document.getElementById('expiredPulldownArrow');
+  expiredHeader.addEventListener('click', () => {
+    const isOpen = els.expiredPostsList.style.display !== 'none';
+    els.expiredPostsList.style.display = isOpen ? 'none' : 'flex';
+    expiredArrow.classList.toggle('open', !isOpen);
+  });
+
   els.settingsNameSave.addEventListener('click', () => {
     const newName = els.settingsNameInput.value.trim();
     if (!newName) return;
@@ -1559,6 +1567,8 @@ function setupSettings() {
 
 function openSettings() {
   els.settingsNameInput.value = state.profile.name;
+  els.expiredPostsList.style.display = 'none';
+  document.getElementById('expiredPulldownArrow').classList.remove('open');
   renderExpiredPosts();
   els.settingsOverlay.classList.add('show');
 }
