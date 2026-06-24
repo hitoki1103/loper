@@ -235,7 +235,12 @@ function cacheElements() {
   els.selectedTagsLabel = document.getElementById('selectedTagsLabel');
   els.selectedTagsPulldown = document.getElementById('selectedTagsPulldown');
 
-  els.profileIcon = document.getElementById('profileIcon');
+  els.hamburgerBtn = document.getElementById('hamburgerBtn');
+  els.menuOverlay = document.getElementById('menuOverlay');
+  els.menuCloseBtn = document.getElementById('menuCloseBtn');
+  els.menuProfileIcon = document.getElementById('menuProfileIcon');
+  els.menuProfileName = document.getElementById('menuProfileName');
+  els.menuProfileArea = document.querySelector('.menu-profile-area');
 
   els.detailModalOverlay = document.getElementById('detailModalOverlay');
   els.detailModal = document.getElementById('detailModal');
@@ -1273,9 +1278,30 @@ function updateImagePreviews() {
    プロフィールアイコン・プロフィール画面
    ========================================================= */
 function setupProfileIcon() {
-  els.profileIcon.addEventListener('click', () => {
+  els.hamburgerBtn.addEventListener('click', () => openMenu());
+  els.menuCloseBtn.addEventListener('click', () => closeMenu());
+  els.menuOverlay.addEventListener('click', (e) => {
+    if (e.target === els.menuOverlay) closeMenu();
+  });
+  els.menuProfileArea.addEventListener('click', () => {
+    closeMenu();
     openProfilePanel();
   });
+}
+
+function openMenu() {
+  applyMenuProfile();
+  els.menuOverlay.classList.add('show');
+}
+
+function closeMenu() {
+  els.menuOverlay.classList.remove('show');
+}
+
+function applyMenuProfile() {
+  const url = state.profile.avatarUrl ? 'url(' + state.profile.avatarUrl + ')' : '';
+  els.menuProfileIcon.style.backgroundImage = url;
+  els.menuProfileName.textContent = state.profile.name || '名前';
 }
 
 function openProfilePanel() {
@@ -1289,7 +1315,8 @@ function closeProfilePanel() {
 function applyProfileAvatar() {
   const url = state.profile.avatarUrl ? 'url(' + state.profile.avatarUrl + ')' : '';
   els.profileAvatar.style.backgroundImage = url;
-  els.profileIcon.style.backgroundImage = url;
+  els.menuProfileIcon.style.backgroundImage = url;
+  els.menuProfileName.textContent = state.profile.name || '名前';
 }
 
 function setupProfilePanel() {
@@ -1559,6 +1586,7 @@ function setupSettings() {
     if (!newName) return;
     state.profile.name = newName;
     els.profileNameInput.textContent = newName;
+    els.menuProfileName.textContent = newName;
     renderPosts();
     debouncedSaveProfile();
     showToast('名前を変更しました');

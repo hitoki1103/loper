@@ -257,15 +257,127 @@ button {
   background: rgba(255, 255, 255, 0.25);
 }
 
-.profile-icon {
+/* ================= ハンバーガーメニューボタン ================= */
+.hamburger-btn {
   width: 46px;
   height: 46px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+/* ================= メニュー画面 ================= */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: none;
+  z-index: 1400;
+}
+
+.menu-overlay.show {
+  display: block;
+}
+
+.menu-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 300px;
+  max-width: 80%;
+  background: var(--sidebar-bg);
+  padding: 22px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+}
+
+.menu-panel::-webkit-scrollbar { display: none; }
+
+.menu-overlay.show .menu-panel {
+  transform: translateX(0);
+}
+
+.menu-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.menu-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+.menu-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.menu-profile-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.menu-profile-area:hover {
+  opacity: 0.8;
+}
+
+.menu-profile-icon {
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: #FFFFFF;
   background-size: cover;
   background-position: center;
-  flex-shrink: 0;
-  cursor: pointer;
+}
+
+.menu-profile-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--category-text-color);
 }
 
 /* ================= カテゴリ・タグバー ================= */
