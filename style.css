@@ -570,6 +570,7 @@ button {
   font-weight: bold;
   letter-spacing: 2px;
   padding: 6px 26px 14px;
+  text-align: center;
 }
 
 .category-item {
