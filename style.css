@@ -30,7 +30,7 @@
   --card-border-game: #5577E0;
   --card-border-app: #9B7BD6;
   --card-border-site: #B08A5E;
-  --card-border-video: #FFFFFF;
+  --card-border-video: #C9C9C9;
   --content-box-border: #BDE6EC;
   --content-box-bg: #FBFEFE;
   --avatar-bg: #C9C9C9;
@@ -723,7 +723,6 @@ button {
 .post-card.cat-site  { border-color: var(--card-border-site); }
 .post-card.cat-video {
   border-color: var(--card-border-video);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 /* アイコン・名前 */
