@@ -189,6 +189,7 @@ const state = {
     name: '名前',
     avatarUrl: 'images/ProfileIcon.png',
     bio: '',
+    contact: '',
     links: [''],
   },
 };
@@ -297,6 +298,8 @@ function cacheElements() {
   els.settingsCloseBtn = document.getElementById('settingsCloseBtn');
   els.settingsNameInput = document.getElementById('settingsNameInput');
   els.settingsNameSave = document.getElementById('settingsNameSave');
+  els.settingsContactInput = document.getElementById('settingsContactInput');
+  els.settingsContactSave = document.getElementById('settingsContactSave');
   els.expiredPostsList = document.getElementById('expiredPostsList');
 
   els.toast = document.getElementById('toast');
@@ -309,6 +312,7 @@ function cacheElements() {
   els.profileAvatarInput = document.getElementById('profileAvatarInput');
   els.profileAvatarDeleteBtn = document.getElementById('profileAvatarDeleteBtn');
   els.profileNameInput = document.getElementById('profileNameInput');
+  els.profileContactDisplay = document.getElementById('profileContactDisplay');
   els.profileBio = document.getElementById('profileBio');
   els.profileLinksContainer = document.getElementById('profileLinks');
   els.profileAddLinkBtn = document.getElementById('profileAddLinkBtn');
@@ -1821,10 +1825,19 @@ function setupSettings() {
     debouncedSaveProfile();
     showToast('名前を変更しました');
   });
+
+  els.settingsContactSave.addEventListener('click', () => {
+    const newContact = els.settingsContactInput.value.trim();
+    state.profile.contact = newContact;
+    els.profileContactDisplay.textContent = newContact;
+    debouncedSaveProfile();
+    showToast('連絡先を変更しました');
+  });
 }
 
 function openSettings() {
   els.settingsNameInput.value = state.profile.name;
+  els.settingsContactInput.value = state.profile.contact;
   els.expiredPostsList.style.display = 'none';
   document.getElementById('expiredPulldownArrow').classList.remove('open');
   renderExpiredPosts();
@@ -2064,17 +2077,20 @@ async function onFirebaseLogin(user) {
       state.profile.name = data.name || user.displayName || '名前';
       state.profile.avatarUrl = data.avatarUrl || user.photoURL || '';
       state.profile.bio = data.bio || '';
+      state.profile.contact = data.contact || '';
       state.profile.links = data.links && data.links.length > 0 ? data.links : [''];
     } else {
       state.profile.name = user.displayName || '名前';
       state.profile.avatarUrl = user.photoURL || '';
       state.profile.bio = '';
+      state.profile.contact = '';
       state.profile.links = [''];
 
       await fb.setDoc(userRef, {
         name: state.profile.name,
         avatarUrl: state.profile.avatarUrl,
         bio: state.profile.bio,
+        contact: state.profile.contact,
         links: state.profile.links,
         githubUid: user.uid,
         githubName: user.displayName,
@@ -2090,6 +2106,7 @@ async function onFirebaseLogin(user) {
   }
 
   els.profileNameInput.textContent = state.profile.name;
+  els.profileContactDisplay.textContent = state.profile.contact;
   els.profileBio.value = state.profile.bio;
   applyProfileAvatar();
   renderProfileLinks();
@@ -2105,9 +2122,11 @@ function onFirebaseLogout() {
   state.profile.name = '名前';
   state.profile.avatarUrl = 'images/ProfileIcon.png';
   state.profile.bio = '';
+  state.profile.contact = '';
   state.profile.links = [''];
 
   els.profileNameInput.textContent = state.profile.name;
+  els.profileContactDisplay.textContent = state.profile.contact;
   els.profileBio.value = state.profile.bio;
   applyProfileAvatar();
   renderProfileLinks();
@@ -2131,6 +2150,7 @@ async function saveProfileToFirestore() {
       name: state.profile.name,
       avatarUrl: state.profile.avatarUrl,
       bio: state.profile.bio,
+      contact: state.profile.contact,
       links: state.profile.links.filter(l => l.trim() !== ''),
       updatedAt: new Date().toISOString(),
     }, { merge: true });
